@@ -237,3 +237,22 @@ button.primary {
 .opt.name.selected {
   border-color: #4da3ff;
 }
+
+.key {
+  display: none;
+  margin-left: 8px;
+  padding: 2px 8px;
+  font: inherit;
+  font-size: 13px;
+  color: #8b94a3;
+  background: #0b0e14;
+  border: 1px solid #263044;
+  border-bottom-width: 2px;
+  border-radius: 6px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .key {
+    display: inline-block;
+  }
+}

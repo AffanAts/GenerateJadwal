@@ -42,3 +42,13 @@ test('skips partner for OFF', () => {
   userEvent.click(screen.getByRole('button', { name: 'OFF' }));
   expect(document.querySelector('.daynum')).toHaveTextContent('2');
 });
+
+test('X key skips the partner step', () => {
+  render(<App />);
+  userEvent.click(screen.getByRole('switch'));
+  userEvent.click(screen.getByRole('button', { name: 'Lanjut' }));
+  userEvent.click(screen.getByRole('button', { name: 'Lanjut' }));
+  userEvent.click(screen.getByRole('button', { name: '1' }));
+  userEvent.keyboard('x');
+  expect(document.querySelector('.daynum')).toHaveTextContent('2');
+});

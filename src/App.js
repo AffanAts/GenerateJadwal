@@ -81,6 +81,17 @@ function App() {
     advance();
   };
 
+  useEffect(() => {
+    if (step !== 'days' || phase !== 'partner') return undefined;
+    const onKey = (e) => {
+      if (e.key.toLowerCase() !== 'x' || e.ctrlKey || e.metaKey || e.altKey) return;
+      if (/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+      clearPartner();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
+
   const back = () => {
     if (phase === 'partner') setPhase('shift');
     else if (day > 1) setDay(day - 1);
@@ -233,7 +244,7 @@ function App() {
                 </div>
               ))}
               <button type="button" onClick={clearPartner}>
-                Tanpa partner
+                Tanpa partner <kbd className="key">X</kbd>
               </button>
             </>
           )}
