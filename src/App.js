@@ -70,8 +70,14 @@ function App() {
     advance();
   };
 
-  const pickPartner = (partner) => {
-    setPartners(({ [day]: _old, ...rest }) => (partner ? { ...rest, [day]: partner } : rest));
+  const pickPartner = (level, partner) => {
+    const next = { ...partners[day], [level]: partner };
+    setPartners((prev) => ({ ...prev, [day]: next }));
+    if (next.L1 && next.L2) advance();
+  };
+
+  const clearPartner = () => {
+    setPartners(({ [day]: _old, ...rest }) => rest);
     advance();
   };
 
@@ -206,7 +212,7 @@ function App() {
 
           {phase === 'partner' && (
             <>
-              <p className="sub">Partner shift</p>
+              <p className="sub">Pilih partner L1 dan L2</p>
               {Object.entries(PARTNERS).map(([level, names]) => (
                 <div key={level}>
                   <p className="group">{level}</p>
@@ -217,8 +223,8 @@ function App() {
                         <button
                           key={n}
                           type="button"
-                          className={`opt name${partners[day] === n ? ' selected' : ''}`}
-                          onClick={() => pickPartner(n)}
+                          className={`opt name${partners[day]?.[level] === n ? ' selected' : ''}`}
+                          onClick={() => pickPartner(level, n)}
                         >
                           {n}
                         </button>
@@ -226,7 +232,7 @@ function App() {
                   </div>
                 </div>
               ))}
-              <button type="button" onClick={() => pickPartner(null)}>
+              <button type="button" onClick={clearPartner}>
                 Tanpa partner
               </button>
             </>

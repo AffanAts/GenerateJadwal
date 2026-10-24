@@ -29,6 +29,8 @@ test('asks for partner after shift when the toggle is on', () => {
   expect(screen.getByRole('button', { name: 'Bram' })).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Affan' })).not.toBeInTheDocument();
   userEvent.click(screen.getByRole('button', { name: 'Feby' }));
+  expect(document.querySelector('.daynum')).toHaveTextContent('1');
+  userEvent.click(screen.getByRole('button', { name: 'Bram' }));
   expect(document.querySelector('.daynum')).toHaveTextContent('2');
 });
 

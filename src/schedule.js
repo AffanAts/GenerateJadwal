@@ -101,12 +101,17 @@ export function drawSchedule(canvas, { name, year, month, entries, partners = {}
       ctx.textAlign = 'center';
       ctx.fillStyle = opt.fg;
       ctx.font = `800 ${opt.label.length > 3 ? 40 : 50}px ${FONT}`;
-      const partner = partners[day];
-      ctx.fillText(opt.label, x + CELL / 2, y + CELL / 2 + (partner ? 4 : 14), CELL - 16);
-      if (partner) {
-        ctx.fillStyle = '#8b94a3';
+      const names = [partners[day]?.L1, partners[day]?.L2].filter(Boolean);
+      const labelY = names.length === 2 ? y + 58 : y + CELL / 2 + (names.length ? 4 : 14);
+      ctx.fillText(opt.label, x + CELL / 2, labelY, CELL - 16);
+      ctx.fillStyle = '#8b94a3';
+      if (names.length === 2) {
+        ctx.font = `700 22px ${FONT}`;
+        ctx.fillText(names[0], x + CELL / 2, y + 102, CELL - 12);
+        ctx.fillText(names[1], x + CELL / 2, y + 126, CELL - 12);
+      } else if (names.length === 1) {
         ctx.font = `700 26px ${FONT}`;
-        ctx.fillText(partner, x + CELL / 2, y + CELL - 28, CELL - 12);
+        ctx.fillText(names[0], x + CELL / 2, y + CELL - 28, CELL - 12);
       }
     }
   }
