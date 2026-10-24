@@ -7,12 +7,18 @@ export const DAY_NAMES = ['SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB', 'MIN'];
 
 export const DEFAULT_NAME = 'Affan Ats';
 
+export const PARTNERS = {
+  L1: ['Feby', 'Arif', 'Kelvin', 'Resvi', 'Ragil', 'Imam', 'Ryo', 'Affan', 'Adel'],
+  L2: ['Bram', 'Adam', 'Fuad', 'Rahmad', 'Farhan'],
+};
+
 export const OPTIONS = [
   { key: '1', option: '1', label: 'S1', fg: '#4da3ff', bg: '#14202f', border: '#24405f' },
   { key: '2', option: '2', label: 'S2', fg: '#3fbf5a', bg: '#12241c', border: '#1f4a33' },
   { key: '2+', option: '2+', label: 'S2+', fg: '#3fbf5a', bg: '#12241c', border: '#1f4a33' },
   { key: '3', option: '3', label: 'S3', fg: '#ff9f1a', bg: '#2a2014', border: '#5a4220' },
   { key: '3+', option: '3+', label: 'S3+', fg: '#ff9f1a', bg: '#2a2014', border: '#5a4220' },
+  { key: 'REG', option: 'REG', label: 'REG', fg: '#2ad4d0', bg: '#10242a', border: '#1d4a52' },
   { key: 'OFF', option: 'OFF', label: 'OFF', fg: '#e03c3c', bg: '#241518', border: '#4a2a30' },
   { key: 'CUTI', option: 'Cuti', label: 'CUTI', fg: '#b48cff', bg: '#1f1a2e', border: '#3d3260' },
 ];
@@ -35,7 +41,7 @@ const HEIGHT = 2532;
 const CELL = 144;
 const FONT = '-apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
 
-export function drawSchedule(canvas, { name, year, month, entries }) {
+export function drawSchedule(canvas, { name, year, month, entries, partners = {} }) {
   canvas.width = WIDTH;
   canvas.height = HEIGHT;
   const ctx = canvas.getContext('2d');
@@ -95,7 +101,13 @@ export function drawSchedule(canvas, { name, year, month, entries }) {
       ctx.textAlign = 'center';
       ctx.fillStyle = opt.fg;
       ctx.font = `800 ${opt.label.length > 3 ? 40 : 50}px ${FONT}`;
-      ctx.fillText(opt.label, x + CELL / 2, y + CELL / 2 + 14, CELL - 16);
+      const partner = partners[day];
+      ctx.fillText(opt.label, x + CELL / 2, y + CELL / 2 + (partner ? 4 : 14), CELL - 16);
+      if (partner) {
+        ctx.fillStyle = '#8b94a3';
+        ctx.font = `700 26px ${FONT}`;
+        ctx.fillText(partner, x + CELL / 2, y + CELL - 28, CELL - 12);
+      }
     }
   }
 

@@ -5,25 +5,32 @@ import {
   DEFAULT_NAME,
   MONTH_NAMES,
   OPTIONS,
+  PARTNERS,
   daysInMonth,
   drawSchedule,
   nextMonth,
   weekdayIndex,
 } from './schedule';
 
+const NO_PARTNER_KEYS = ['OFF', 'CUTI'];
+
 function App() {
   const initial = nextMonth();
   const [step, setStep] = useState('month');
   const [year, setYear] = useState(initial.year);
   const [month, setMonth] = useState(initial.month);
+  const [withPartners, setWithPartners] = useState(false);
   const [name, setName] = useState(DEFAULT_NAME);
   const [day, setDay] = useState(1);
+  const [phase, setPhase] = useState('shift');
   const [entries, setEntries] = useState({});
+  const [partners, setPartners] = useState({});
   const canvasRef = useRef(null);
 
   const total = daysInMonth(year, month);
   const thisYear = new Date().getFullYear();
   const years = [thisYear - 1, thisYear, thisYear + 1, thisYear + 2];
+  const self = name.trim().split(' ')[0].toLowerCase();
 
   useEffect(() => {
     if (step === 'result' && canvasRef.current) {
@@ -32,20 +39,46 @@ function App() {
         year,
         month,
         entries,
+        partners,
       });
     }
-  }, [step, name, year, month, entries]);
+  }, [step, name, year, month, entries, partners]);
 
   const changeMonth = (nextYear, nextMonthIndex) => {
     setYear(nextYear);
     setMonth(nextMonthIndex);
     setEntries({});
+    setPartners({});
   };
 
-  const pick = (key) => {
+  const advance = () => {
+    if (day < total) {
+      setDay(day + 1);
+      setPhase('shift');
+    } else {
+      setStep('result');
+    }
+  };
+
+  const pickShift = (key) => {
     setEntries((prev) => ({ ...prev, [day]: key }));
-    if (day < total) setDay(day + 1);
-    else setStep('result');
+    if (withPartners && !NO_PARTNER_KEYS.includes(key)) {
+      setPhase('partner');
+      return;
+    }
+    setPartners(({ [day]: _removed, ...rest }) => rest);
+    advance();
+  };
+
+  const pickPartner = (partner) => {
+    setPartners(({ [day]: _old, ...rest }) => (partner ? { ...rest, [day]: partner } : rest));
+    advance();
+  };
+
+  const back = () => {
+    if (phase === 'partner') setPhase('shift');
+    else if (day > 1) setDay(day - 1);
+    else setStep('name');
   };
 
   const download = () => {
@@ -59,7 +92,9 @@ function App() {
     const next = nextMonth();
     changeMonth(next.year, next.month);
     setName(DEFAULT_NAME);
+    setWithPartners(false);
     setDay(1);
+    setPhase('shift');
     setStep('month');
   };
 
@@ -97,6 +132,16 @@ function App() {
               ))}
             </select>
           </div>
+          <label className="toggle">
+            <input
+              type="checkbox"
+              role="switch"
+              checked={withPartners}
+              onChange={(e) => setWithPartners(e.target.checked)}
+            />
+            <span className="switch" aria-hidden="true" />
+            <span>Isi nama partner shift</span>
+          </label>
           <button className="primary" type="submit">Lanjut</button>
         </form>
       )}
@@ -107,6 +152,7 @@ function App() {
           onSubmit={(e) => {
             e.preventDefault();
             setDay(1);
+            setPhase('shift');
             setStep('days');
           }}
         >
@@ -141,35 +187,60 @@ function App() {
               {DAY_NAMES[weekdayIndex(year, month, day)]}
             </span>
           </div>
-          <div className="options">
-            {OPTIONS.map((o) => (
-              <button
-                key={o.key}
-                type="button"
-                className={`opt${entries[day] === o.key ? ' selected' : ''}`}
-                style={{ '--fg': o.fg, '--bg': o.bg, '--bd': o.border }}
-                onClick={() => pick(o.key)}
-              >
-                {o.option}
+
+          {phase === 'shift' && (
+            <div className="options">
+              {OPTIONS.map((o) => (
+                <button
+                  key={o.key}
+                  type="button"
+                  className={`opt${entries[day] === o.key ? ' selected' : ''}`}
+                  style={{ '--fg': o.fg, '--bg': o.bg, '--bd': o.border }}
+                  onClick={() => pickShift(o.key)}
+                >
+                  {o.option}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {phase === 'partner' && (
+            <>
+              <p className="sub">Partner shift</p>
+              {Object.entries(PARTNERS).map(([level, names]) => (
+                <div key={level}>
+                  <p className="group">{level}</p>
+                  <div className="options">
+                    {names
+                      .filter((n) => n.toLowerCase() !== self)
+                      .map((n) => (
+                        <button
+                          key={n}
+                          type="button"
+                          className={`opt name${partners[day] === n ? ' selected' : ''}`}
+                          onClick={() => pickPartner(n)}
+                        >
+                          {n}
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              ))}
+              <button type="button" onClick={() => pickPartner(null)}>
+                Tanpa partner
               </button>
-            ))}
-          </div>
+            </>
+          )}
+
           <div className="row">
-            <button
-              className="ghost"
-              type="button"
-              onClick={() => (day > 1 ? setDay(day - 1) : setStep('name'))}
-            >
+            <button className="ghost" type="button" onClick={back}>
               Kembali
             </button>
-            <button
-              className="ghost"
-              type="button"
-              disabled={!entries[day]}
-              onClick={() => (day < total ? setDay(day + 1) : setStep('result'))}
-            >
-              Lewati
-            </button>
+            {phase === 'shift' && (
+              <button className="ghost" type="button" disabled={!entries[day]} onClick={advance}>
+                Lewati
+              </button>
+            )}
           </div>
         </section>
       )}
@@ -188,6 +259,7 @@ function App() {
               type="button"
               onClick={() => {
                 setDay(total);
+                setPhase('shift');
                 setStep('days');
               }}
             >
