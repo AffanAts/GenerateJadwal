@@ -256,3 +256,9 @@ button.primary {
     display: inline-block;
   }
 }
+
+.hint {
+  margin: 0;
+  text-align: center;
+  color: #8b94a3;
+}

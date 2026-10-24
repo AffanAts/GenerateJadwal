@@ -9,6 +9,7 @@ import {
   daysInMonth,
   drawSchedule,
   nextMonth,
+  optionByKey,
   weekdayIndex,
 } from './schedule';
 
@@ -61,12 +62,13 @@ function App() {
     if (day < total) {
       setDay(day + 1);
       setPhase('shift');
+    } else if (compareOn) {
+      setDay(1);
+      setStep('compare');
     } else {
       setStep('result');
     }
   };
-
-  const afterPartner = () => (compareOn ? setPhase('compare') : advance());
 
   const pickShift = (key) => {
     setEntries((prev) => ({ ...prev, [day]: key }));
@@ -75,48 +77,59 @@ function App() {
       return;
     }
     setPartners(({ [day]: _removed, ...rest }) => rest);
-    afterPartner();
+    advance();
   };
 
   const pickPartner = (level, partner) => {
     const next = { ...partners[day], [level]: partner };
     setPartners((prev) => ({ ...prev, [day]: next }));
-    if (next.L1 && next.L2) afterPartner();
+    if (next.L1 && next.L2) advance();
   };
 
   const clearPartner = () => {
     setPartners(({ [day]: _old, ...rest }) => rest);
-    afterPartner();
+    advance();
   };
+
+  const nextCompare = () => (day < total ? setDay(day + 1) : setStep('result'));
 
   const pickCompare = (key) => {
     setCompare((prev) => ({ ...prev, [day]: key }));
-    advance();
+    nextCompare();
   };
 
   const skipCompare = () => {
     setCompare(({ [day]: _old, ...rest }) => rest);
-    advance();
+    nextCompare();
   };
 
   useEffect(() => {
-    if (step !== 'days' || (phase !== 'partner' && phase !== 'compare')) return undefined;
+    const partnerStep = step === 'days' && phase === 'partner';
+    if (!partnerStep && step !== 'compare') return undefined;
     const onKey = (e) => {
       if (e.key.toLowerCase() !== 'x' || e.ctrlKey || e.metaKey || e.altKey) return;
       if (/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
-      if (phase === 'partner') clearPartner();
-      else skipCompare();
+      if (step === 'compare') skipCompare();
+      else clearPartner();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   });
 
   const back = () => {
-    if (phase === 'compare') {
-      setPhase(withPartners && !NO_PARTNER_KEYS.includes(entries[day]) ? 'partner' : 'shift');
-    } else if (phase === 'partner') setPhase('shift');
+    if (phase === 'partner') setPhase('shift');
     else if (day > 1) setDay(day - 1);
     else setStep('name');
+  };
+
+  const backCompare = () => {
+    if (day > 1) {
+      setDay(day - 1);
+    } else {
+      setDay(total);
+      setPhase('shift');
+      setStep('days');
+    }
   };
 
   const download = () => {
@@ -299,28 +312,6 @@ function App() {
             </>
           )}
 
-          {phase === 'compare' && (
-            <>
-              <p className="sub">Shift {comparePerson}</p>
-              <div className="options">
-                {OPTIONS.map((o) => (
-                  <button
-                    key={o.key}
-                    type="button"
-                    className={`opt${compare[day] === o.key ? ' selected' : ''}`}
-                    style={{ '--fg': o.fg, '--bg': o.bg, '--bd': o.border }}
-                    onClick={() => pickCompare(o.key)}
-                  >
-                    {o.option}
-                  </button>
-                ))}
-              </div>
-              <button type="button" onClick={skipCompare}>
-                Kosongkan <kbd className="key">X</kbd>
-              </button>
-            </>
-          )}
-
           <div className="row">
             <button className="ghost" type="button" onClick={back}>
               Kembali
@@ -330,6 +321,44 @@ function App() {
                 Lewati
               </button>
             )}
+          </div>
+        </section>
+      )}
+
+      {step === 'compare' && (
+        <section className="card">
+          <p className="sub">{MONTH_NAMES[month]} {year} · Shift {comparePerson}</p>
+          <div className="progress" aria-hidden="true">
+            <span style={{ width: `${((day - 1) / total) * 100}%` }} />
+          </div>
+          <div className="dayhead">
+            <span className="daynum">{day}</span>
+            <span className="daytotal">/ {total}</span>
+            <span className={`dayname${weekdayIndex(year, month, day) >= 5 ? ' weekend' : ''}`}>
+              {DAY_NAMES[weekdayIndex(year, month, day)]}
+            </span>
+          </div>
+          <p className="hint">Shift kamu: {optionByKey(entries[day])?.label ?? '-'}</p>
+          <div className="options">
+            {OPTIONS.map((o) => (
+              <button
+                key={o.key}
+                type="button"
+                className={`opt${compare[day] === o.key ? ' selected' : ''}`}
+                style={{ '--fg': o.fg, '--bg': o.bg, '--bd': o.border }}
+                onClick={() => pickCompare(o.key)}
+              >
+                {o.option}
+              </button>
+            ))}
+          </div>
+          <button type="button" onClick={skipCompare}>
+            Kosongkan <kbd className="key">X</kbd>
+          </button>
+          <div className="row">
+            <button className="ghost" type="button" onClick={backCompare}>
+              Kembali
+            </button>
           </div>
         </section>
       )}

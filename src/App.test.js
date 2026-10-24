@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
-import { daysInMonth } from './schedule';
+import { daysInMonth, nextMonth } from './schedule';
 
 test('walks from month to name to day picker', () => {
   render(<App />);
@@ -53,18 +53,22 @@ test('X key skips the partner step', () => {
   expect(document.querySelector('.daynum')).toHaveTextContent('2');
 });
 
-test('compare person asks for their shift each day', () => {
+test('compare person is asked after all own days are filled', () => {
   render(<App />);
   userEvent.click(screen.getByRole('switch', { name: 'Compare person' }));
   expect(screen.getByLabelText('Orang yang dibandingkan')).toHaveValue('Arif');
   userEvent.click(screen.getByRole('button', { name: 'Lanjut' }));
   userEvent.click(screen.getByRole('button', { name: 'Lanjut' }));
-  userEvent.click(screen.getByRole('button', { name: '1' }));
-  expect(screen.getByText('Shift Arif')).toBeInTheDocument();
+  const total = daysInMonth(nextMonth().year, nextMonth().month);
+  for (let i = 1; i <= total; i++) {
+    expect(screen.queryByText(/Shift Arif/)).not.toBeInTheDocument();
+    userEvent.click(screen.getByRole('button', { name: i % 2 ? '1' : 'OFF' }));
+  }
+  expect(screen.getByText(/Shift Arif/)).toBeInTheDocument();
   expect(document.querySelector('.daynum')).toHaveTextContent('1');
+  expect(screen.getByText('Shift kamu: S1')).toBeInTheDocument();
   userEvent.click(screen.getByRole('button', { name: '2' }));
   expect(document.querySelector('.daynum')).toHaveTextContent('2');
-  userEvent.click(screen.getByRole('button', { name: 'OFF' }));
   userEvent.keyboard('x');
   expect(document.querySelector('.daynum')).toHaveTextContent('3');
 });
