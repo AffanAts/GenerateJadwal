@@ -21,7 +21,7 @@ test('counts days in a month', () => {
 
 test('asks for partner after shift when the toggle is on', () => {
   render(<App />);
-  userEvent.click(screen.getByRole('switch'));
+  userEvent.click(screen.getByRole('switch', { name: 'Isi nama partner shift' }));
   userEvent.click(screen.getByRole('button', { name: 'Lanjut' }));
   userEvent.click(screen.getByRole('button', { name: 'Lanjut' }));
   userEvent.click(screen.getByRole('button', { name: '1' }));
@@ -36,7 +36,7 @@ test('asks for partner after shift when the toggle is on', () => {
 
 test('skips partner for OFF', () => {
   render(<App />);
-  userEvent.click(screen.getByRole('switch'));
+  userEvent.click(screen.getByRole('switch', { name: 'Isi nama partner shift' }));
   userEvent.click(screen.getByRole('button', { name: 'Lanjut' }));
   userEvent.click(screen.getByRole('button', { name: 'Lanjut' }));
   userEvent.click(screen.getByRole('button', { name: 'OFF' }));
@@ -45,10 +45,26 @@ test('skips partner for OFF', () => {
 
 test('X key skips the partner step', () => {
   render(<App />);
-  userEvent.click(screen.getByRole('switch'));
+  userEvent.click(screen.getByRole('switch', { name: 'Isi nama partner shift' }));
   userEvent.click(screen.getByRole('button', { name: 'Lanjut' }));
   userEvent.click(screen.getByRole('button', { name: 'Lanjut' }));
   userEvent.click(screen.getByRole('button', { name: '1' }));
   userEvent.keyboard('x');
   expect(document.querySelector('.daynum')).toHaveTextContent('2');
+});
+
+test('compare person asks for their shift each day', () => {
+  render(<App />);
+  userEvent.click(screen.getByRole('switch', { name: 'Compare person' }));
+  expect(screen.getByLabelText('Orang yang dibandingkan')).toHaveValue('Arif');
+  userEvent.click(screen.getByRole('button', { name: 'Lanjut' }));
+  userEvent.click(screen.getByRole('button', { name: 'Lanjut' }));
+  userEvent.click(screen.getByRole('button', { name: '1' }));
+  expect(screen.getByText('Shift Arif')).toBeInTheDocument();
+  expect(document.querySelector('.daynum')).toHaveTextContent('1');
+  userEvent.click(screen.getByRole('button', { name: '2' }));
+  expect(document.querySelector('.daynum')).toHaveTextContent('2');
+  userEvent.click(screen.getByRole('button', { name: 'OFF' }));
+  userEvent.keyboard('x');
+  expect(document.querySelector('.daynum')).toHaveTextContent('3');
 });

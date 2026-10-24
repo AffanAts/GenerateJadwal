@@ -25,6 +25,9 @@ function App() {
   const [phase, setPhase] = useState('shift');
   const [entries, setEntries] = useState({});
   const [partners, setPartners] = useState({});
+  const [compareOn, setCompareOn] = useState(false);
+  const [comparePerson, setComparePerson] = useState('Arif');
+  const [compare, setCompare] = useState({});
   const canvasRef = useRef(null);
 
   const total = daysInMonth(year, month);
@@ -40,15 +43,18 @@ function App() {
         month,
         entries,
         partners,
+        compare,
+        compareName: compareOn ? comparePerson : null,
       });
     }
-  }, [step, name, year, month, entries, partners]);
+  }, [step, name, year, month, entries, partners, compare, compareOn, comparePerson]);
 
   const changeMonth = (nextYear, nextMonthIndex) => {
     setYear(nextYear);
     setMonth(nextMonthIndex);
     setEntries({});
     setPartners({});
+    setCompare({});
   };
 
   const advance = () => {
@@ -60,6 +66,8 @@ function App() {
     }
   };
 
+  const afterPartner = () => (compareOn ? setPhase('compare') : advance());
+
   const pickShift = (key) => {
     setEntries((prev) => ({ ...prev, [day]: key }));
     if (withPartners && !NO_PARTNER_KEYS.includes(key)) {
@@ -67,33 +75,46 @@ function App() {
       return;
     }
     setPartners(({ [day]: _removed, ...rest }) => rest);
-    advance();
+    afterPartner();
   };
 
   const pickPartner = (level, partner) => {
     const next = { ...partners[day], [level]: partner };
     setPartners((prev) => ({ ...prev, [day]: next }));
-    if (next.L1 && next.L2) advance();
+    if (next.L1 && next.L2) afterPartner();
   };
 
   const clearPartner = () => {
     setPartners(({ [day]: _old, ...rest }) => rest);
+    afterPartner();
+  };
+
+  const pickCompare = (key) => {
+    setCompare((prev) => ({ ...prev, [day]: key }));
+    advance();
+  };
+
+  const skipCompare = () => {
+    setCompare(({ [day]: _old, ...rest }) => rest);
     advance();
   };
 
   useEffect(() => {
-    if (step !== 'days' || phase !== 'partner') return undefined;
+    if (step !== 'days' || (phase !== 'partner' && phase !== 'compare')) return undefined;
     const onKey = (e) => {
       if (e.key.toLowerCase() !== 'x' || e.ctrlKey || e.metaKey || e.altKey) return;
       if (/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
-      clearPartner();
+      if (phase === 'partner') clearPartner();
+      else skipCompare();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   });
 
   const back = () => {
-    if (phase === 'partner') setPhase('shift');
+    if (phase === 'compare') {
+      setPhase(withPartners && !NO_PARTNER_KEYS.includes(entries[day]) ? 'partner' : 'shift');
+    } else if (phase === 'partner') setPhase('shift');
     else if (day > 1) setDay(day - 1);
     else setStep('name');
   };
@@ -110,6 +131,8 @@ function App() {
     changeMonth(next.year, next.month);
     setName(DEFAULT_NAME);
     setWithPartners(false);
+    setCompareOn(false);
+    setComparePerson('Arif');
     setDay(1);
     setPhase('shift');
     setStep('month');
@@ -159,6 +182,33 @@ function App() {
             <span className="switch" aria-hidden="true" />
             <span>Isi nama partner shift</span>
           </label>
+          <label className="toggle">
+            <input
+              type="checkbox"
+              role="switch"
+              checked={compareOn}
+              onChange={(e) => setCompareOn(e.target.checked)}
+            />
+            <span className="switch" aria-hidden="true" />
+            <span>Compare person</span>
+          </label>
+          {compareOn && (
+            <select
+              aria-label="Orang yang dibandingkan"
+              value={comparePerson}
+              onChange={(e) => setComparePerson(e.target.value)}
+            >
+              {Object.entries(PARTNERS).map(([level, names]) => (
+                <optgroup key={level} label={level}>
+                  {names
+                    .filter((n) => n.toLowerCase() !== self)
+                    .map((n) => (
+                      <option key={n} value={n}>{n}</option>
+                    ))}
+                </optgroup>
+              ))}
+            </select>
+          )}
           <button className="primary" type="submit">Lanjut</button>
         </form>
       )}
@@ -245,6 +295,28 @@ function App() {
               ))}
               <button type="button" onClick={clearPartner}>
                 Tanpa partner <kbd className="key">X</kbd>
+              </button>
+            </>
+          )}
+
+          {phase === 'compare' && (
+            <>
+              <p className="sub">Shift {comparePerson}</p>
+              <div className="options">
+                {OPTIONS.map((o) => (
+                  <button
+                    key={o.key}
+                    type="button"
+                    className={`opt${compare[day] === o.key ? ' selected' : ''}`}
+                    style={{ '--fg': o.fg, '--bg': o.bg, '--bd': o.border }}
+                    onClick={() => pickCompare(o.key)}
+                  >
+                    {o.option}
+                  </button>
+                ))}
+              </div>
+              <button type="button" onClick={skipCompare}>
+                Kosongkan <kbd className="key">X</kbd>
               </button>
             </>
           )}
