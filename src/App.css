@@ -262,3 +262,182 @@ button.primary {
   text-align: center;
   color: #8b94a3;
 }
+
+.saved {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  color: #c9a0ff;
+  background: #1f1a2e;
+  border: 1px solid #3d3260;
+  border-radius: 12px;
+}
+
+.import {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.import[open] {
+  padding-top: 4px;
+}
+
+.import summary {
+  padding: 4px 0;
+  color: #8b94a3;
+  cursor: pointer;
+}
+
+.import[open] > summary {
+  margin-bottom: 12px;
+}
+
+.import textarea {
+  width: 100%;
+  padding: 12px;
+  font: inherit;
+  font-size: 14px;
+  color: #e6e9ef;
+  background: #121722;
+  border: 1px solid #263044;
+  border-radius: 12px;
+  resize: vertical;
+}
+
+.import .hint {
+  text-align: left;
+}
+
+.app.wide {
+  max-width: 1200px;
+  justify-content: flex-start;
+}
+
+.team {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settings {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.tablewrap {
+  overflow-x: auto;
+  border: 1px solid #1d2431;
+  border-radius: 12px;
+}
+
+.teamtable {
+  min-width: max-content;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12px;
+}
+
+.teamtable th,
+.teamtable td {
+  min-width: 30px;
+  height: 28px;
+  padding: 0 2px;
+  text-align: center;
+  border-right: 1px solid #0b0e14;
+  border-bottom: 1px solid #0b0e14;
+}
+
+.teamtable thead th {
+  color: #e6e9ef;
+  background: #121722;
+}
+
+.teamtable th.day {
+  font-size: 10px;
+  color: #8b94a3;
+}
+
+.teamtable th.weekend {
+  color: #ff6b6b;
+}
+
+.teamtable th.odd::after {
+  content: ' ●';
+  color: #ffb020;
+  font-size: 8px;
+}
+
+.teamtable .sticky {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 104px;
+  padding: 0 10px;
+  text-align: left;
+  color: #e6e9ef;
+  background: #0f131c;
+}
+
+.teamtable .sticky small {
+  margin-left: 4px;
+  color: #5b6577;
+  font-size: 10px;
+}
+
+.teamtable td.cell {
+  font-weight: 700;
+}
+
+.teamtable tr.group td,
+.teamtable tr.group th {
+  border-top: 2px solid #263044;
+}
+
+.teamtable tr.self .sticky {
+  color: #4da3ff;
+}
+
+.teamtable tr.self td,
+.teamtable tr.self th {
+  box-shadow: inset 0 1px #4da3ff, inset 0 -1px #4da3ff;
+}
+
+.teamtable tr.compare .sticky {
+  color: #c9a0ff;
+}
+
+.teamtable tr.compare td,
+.teamtable tr.compare th {
+  box-shadow: inset 0 1px #c9a0ff, inset 0 -1px #c9a0ff;
+}
+
+.issues {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.issues ul {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+}
+
+.issues li {
+  padding: 4px 10px;
+  font-size: 13px;
+  color: #ffb020;
+  background: #2a2014;
+  border: 1px solid #5a4220;
+  border-radius: 8px;
+}
+
+.issues .hint {
+  text-align: left;
+}

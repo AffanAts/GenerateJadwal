@@ -8,7 +8,7 @@ export const DAY_NAMES = ['SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB', 'MIN'];
 export const DEFAULT_NAME = 'Affan Ats';
 
 export const PARTNERS = {
-  L1: ['Feby', 'Arif', 'Kelvin', 'Resvi', 'Ragil', 'Imam', 'Ryo', 'Affan', 'Adel'],
+  L1: ['Feby', 'Arif', 'Kelvin', 'Resvi', 'Ragil', 'Imam', 'Ryo', 'Affan', 'Adel', 'Bewit'],
   L2: ['Bram', 'Adam', 'Fuad', 'Rahmad', 'Farhan'],
 };
 
@@ -45,6 +45,7 @@ export function drawSchedule(canvas, { name, year, month, entries, partners = {}
   canvas.width = WIDTH;
   canvas.height = HEIGHT;
   const ctx = canvas.getContext('2d');
+  if (!ctx) return;
 
   ctx.fillStyle = '#0b0e14';
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
